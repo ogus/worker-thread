@@ -20,9 +20,9 @@ It is recommended to know [how to use Web Workers](https://developer.mozilla.org
 
 ### Compatibility
 
-IE | Edge | Firefox | Chrome | Safari | Opera | Mobile
---- | --- | --- | --- | --- |
-10+ | ✔ | 13+ | 23+ | 6.1+ | 15+ | ✔
+| IE | Edge | Firefox | Chrome | Safari | Opera | Mobile |
+| --- | --- | --- | --- | --- | --- | --- |
+| 10+ | ✔ | 13+ | 23+ | 6.1+ | 15+ | ✔ |
 
 You can find the browser support for the Worker and Blob API on *Can I Use*:
  + [Web Workers](https://caniuse.com/#feat=webworkers)
