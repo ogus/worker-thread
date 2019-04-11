@@ -1,8 +1,17 @@
 var WorkerThread = (function () {
   "use strict";
 
-  function str(e) {
-    return (typeof e == "function") ? e.toString() : JSON.stringify(e);
+  function str(thing) {
+    if (typeof thing === "object" && !Array.isArray(thing)) {
+      var fn = [];
+      var str = JSON.stringify(thing, function (key, value) {
+        return typeof value === "function" ? (fn.push(value), "__@fn__") : value;
+      });
+      return str.replace(/"__@fn__"/g, function () {
+        return fn.shift();
+      });
+    }
+    return typeof thing === "function" ? thing.toString() : JSON.stringify(thing);
   }
 
   function read(args) {
@@ -50,5 +59,5 @@ var WorkerThread = (function () {
         }
       };
     }
-  }
+  };
 })();
