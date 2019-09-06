@@ -1,17 +1,17 @@
-var WorkerThread = (function () {
+window.Task = (function () {
   "use strict";
 
-  function str(thing) {
-    if (typeof thing === "object" && !Array.isArray(thing)) {
-      var fn = [];
-      var str = JSON.stringify(thing, function (key, value) {
-        return typeof value === "function" ? (fn.push(value), "__@fn__") : value;
+  function str(e) {
+    if (typeof e === "object" && !Array.isArray(e)) {
+      var f = [];
+      var json = JSON.stringify(e, function (k, value) {
+        return typeof value === "function" ? (f.push(value), "__@f__") : value;
       });
-      return str.replace(/"__@fn__"/g, function () {
-        return fn.shift();
+      return json.replace(/"__@fn__"/g, function () {
+        return f.shift();
       });
     }
-    return typeof thing === "function" ? thing.toString() : JSON.stringify(thing);
+    return typeof e === "function" ? e.toString() : JSON.stringify(e);
   }
 
   function read(args) {
@@ -23,41 +23,50 @@ var WorkerThread = (function () {
   }
 
   function worker(data) {
-    var url = URL.createObjectURL(new Blob(data, {type:"text/javascript"}));
+    var url = URL.createObjectURL(new Blob(data, { type:"text/javascript" }));
     var w = new Worker(url);
     URL.revokeObjectURL(url);
     return w;
   }
 
   return {
-    new: function () {
+    run: function () {
       var f = arguments[0].toString();
       var args = read(arguments);
-      return worker(["(",f,")(",args,")"]);
+      var w = worker(["postMessage((",f,")(",args,"));"]);
+      return {
+        then: function (cb) {
+          w.onmessage = function (m) {
+            cb(m.data);
+          };
+        }
+      };
     },
 
     await: function () {
       var f = arguments[0].toString();
       var args = read(arguments);
-      return worker([
-        "self.onmessage=function(e){",
-        "var r=(",f,")(e",(args.length ? "," : ""),args,");",
-        "postMessage(r);}"
-      ]);
-    },
-
-    run: function () {
-      var f = arguments[0].toString();
-      var args = read(arguments);
       var w = worker([
-        "var e=(",f,")(",args,");",
-        "postMessage(e);"
+        "onmessage=function(m){",
+        "postMessage((",f,")(m.data",(args.length ? "," : ""),args,"));}"
       ]);
       return {
-        then: function (f) {
-          w.onmessage = f;
+        postMessage: function (m) {
+          w.postMessage(m)
+        },
+        onmessage: function (cb) {
+          w.onmessage = function (m) {
+            cb(m.data);
+          };
         }
-      };
+      }
+    },
+
+    new: function () {
+      var f = arguments[0].toString();
+      var args = read(arguments);
+      return worker(["(",f,")(",args,")"]);
     }
+
   };
 })();
