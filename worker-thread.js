@@ -1,4 +1,4 @@
-window.Task = (function () {
+window.WorkerThread = (function () {
   "use strict";
 
   function str(e) {
@@ -30,14 +30,20 @@ window.Task = (function () {
   }
 
   return {
+    new: function () {
+      var f = arguments[0].toString();
+      var args = read(arguments);
+      return worker(["(",f,")(",args,")"]);
+    },
+
     run: function () {
       var f = arguments[0].toString();
       var args = read(arguments);
       var w = worker(["postMessage((",f,")(",args,"));"]);
       return {
         then: function (cb) {
-          w.onmessage = function (m) {
-            cb(m.data);
+          w.onmessage = function (e) {
+            cb(e.data);
           };
         }
       };
@@ -50,23 +56,7 @@ window.Task = (function () {
         "onmessage=function(m){",
         "postMessage((",f,")(m.data",(args.length ? "," : ""),args,"));}"
       ]);
-      return {
-        postMessage: function (m) {
-          w.postMessage(m)
-        },
-        onmessage: function (cb) {
-          w.onmessage = function (m) {
-            cb(m.data);
-          };
-        }
-      }
-    },
-
-    new: function () {
-      var f = arguments[0].toString();
-      var args = read(arguments);
-      return worker(["(",f,")(",args,")"]);
+      return w;
     }
-
   };
 })();

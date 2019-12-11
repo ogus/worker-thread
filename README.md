@@ -1,6 +1,6 @@
 # Worker Thread
 
-> A tiny and flexible browser module to emulate multithreading, based on inline WebWorkers
+> A tiny and flexible browser module that enables client-side multi-threading, based on inline WebWorkers
 
 ## Table of Contents
 
@@ -13,7 +13,7 @@
 
 ## Description
 
-This module provides multithreading in a browser context, by using Web Worker without an external file.
+This module provides multi-threading in a browser context, by using Web Worker without an external file.
 
 It uses the Blob API to build an object from an input function, convert it to a URL string, and instantiate an inline WebWorker from that URL. The WebWorker is then executed in a separate thread, whenever it is called through its messaging interface.
 
@@ -52,31 +52,31 @@ git clone https://github.com/ogus/worker-thread.git
 
 ## Usage
 
-The creation of a new thread is equivalent to the creation of a new Worker. The Worker does not need an external file to be instantiated, and it has its own context.
+The creation of a new thread is equivalent to the creation of a new Worker. The Worker does not need an external file to be instantiated, and it will execute the code in a new context.
 
 ```js
-// declare a Worker template
+// declare a Worker as if it was in a separate file
 function threadConstructor = function (name) {
   self.name = name;
   self.value = 0;
   self.onmessage = function (e) {
     self.value += e.data;
-    postMessage(`'${self.name}', value = ${self.value}`);
+    postMessage(self.name + ", value = " + self.value);
   }
 }
 
-// instantiate a new Worker
+// instantiate a new thread
 var thread = WorkerThread.new(threadConstructor, "MyWorker");
+// create a method to output the thread's messages
 thread.onmessage = function (e) {
   console.log("thread message:", e.data);
 }
-
-// send messages !
+// send messages to the thread
 thread.postMessage(1);
 thread.postMessage(10);
 ```
 
-If your thread does not need to save data, you can use a simpler interface that only define the `onmessage` behavior
+If your thread does not need to save data, you can just define the thread `onmessage` behavior
 
 ```js
 // create a Worker by defining its local message listener
